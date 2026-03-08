@@ -3,7 +3,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ARG VITE_API_URL=/api
+# API base URL (default: localhost:8101)
+ARG VITE_API_URL=http://localhost:8101
 ENV VITE_API_URL=$VITE_API_URL
 
 COPY package.json package-lock.json ./

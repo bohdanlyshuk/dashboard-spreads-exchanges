@@ -7,7 +7,6 @@ dist
 
 # Env (do not commit secrets)
 .env
-.env.api
 .env.*.local
 
 # Logs
