@@ -19,7 +19,9 @@ export interface BestPrice {
 export interface Arbitrage {
   best_bid: BestPrice;
   best_ask: BestPrice;
-  spread_pct_abs: number;
+  /** Signed: (best_bid − best_ask) / best_ask × 100; positive = arbitrage opportunity */
+  spread_pct: number;
+  /** spread_pct plus funding adjustment (LONG pays, SHORT receives) */
   net_spread_pct: number;
   direction: string;
 }
@@ -36,7 +38,8 @@ export interface PricesResponse {
 // GET /v1/spread-history
 export interface SpreadHistoryPoint {
   ts: string;
-  spread_pct_abs: number;
+  /** Signed spread %; positive = arb opportunity */
+  spread_pct: number;
   net_spread_pct: number;
 }
 

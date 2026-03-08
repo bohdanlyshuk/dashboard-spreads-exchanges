@@ -9,6 +9,7 @@ import {
   Tooltip,
   Legend,
   CartesianGrid,
+  ReferenceLine,
 } from "recharts";
 import {
   fetchPrices,
@@ -83,7 +84,16 @@ export default function SpreadHistoryChart({
 
   const hist =
     data && !isErrorResp(data) ? (data as SpreadHistoryResponse) : null;
-  const series = hist?.series ?? [];
+  const rawSeries = hist?.series ?? [];
+  const series = useMemo(
+    () =>
+      rawSeries.map((p: { ts: string; spread_pct?: number; spread_pct_abs?: number; net_spread_pct: number }) => ({
+        ...p,
+        spread_pct: p.spread_pct ?? p.spread_pct_abs ?? 0,
+        net_spread_pct: p.net_spread_pct,
+      })),
+    [rawSeries]
+  );
   const has503 = !!(
     data &&
     isErrorResp(data) &&
@@ -162,15 +172,25 @@ export default function SpreadHistoryChart({
 
       {!has503 && !errMsg && series.length > 0 && (
         <div className="glass-effect rounded-2xl p-6 border border-white/5">
-          <div className="h-[360px] w-full">
+          <p className="text-xs text-gray-400 mb-3">
+            Signed spread: positive = arbitrage (buy ask, sell bid). Zero line = no spread. Decorrelation shows as drift from zero.
+          </p>
+          <div className="h-[420px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
                 data={series}
-                margin={{ top: 8, right: 16, left: 8, bottom: 8 }}
+                margin={{ top: 12, right: 20, left: 12, bottom: 12 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="rgba(255,255,255,0.08)"
+                />
+                <ReferenceLine
+                  y={0}
+                  stroke="rgba(255,255,255,0.4)"
+                  strokeDasharray="4 4"
+                  strokeWidth={1.5}
+                  label={{ value: "0", position: "right", fill: "#9ca3af", fontSize: 10 }}
                 />
                 <XAxis
                   dataKey="ts"
@@ -191,9 +211,13 @@ export default function SpreadHistoryChart({
                   stroke="rgba(255,255,255,0.15)"
                   tick={{ fill: "#9ca3af", fontSize: 11 }}
                   tickFormatter={(v) => `${Number(v).toFixed(3)}%`}
+                  domain={["auto", "auto"]}
                 />
                 <Tooltip
-                  formatter={(v: number) => [`${Number(v).toFixed(4)}%`, ""]}
+                  formatter={(v: number, name: string) => [
+                    `${Number(v).toFixed(4)}%`,
+                    name === "spread_pct" ? "Spread % (signed)" : "Net spread %",
+                  ]}
                   labelFormatter={(v) => new Date(v).toLocaleString()}
                   contentStyle={{
                     backgroundColor: "rgba(31,41,55,0.98)",
@@ -204,22 +228,24 @@ export default function SpreadHistoryChart({
                   labelStyle={{ color: "#e5e7eb" }}
                   itemStyle={{ color: "#9ca3af" }}
                 />
-                <Legend wrapperStyle={{ color: "#9ca3af" }} />
+                <Legend wrapperStyle={{ color: "#9ca3af" }} formatter={(value) => (value === "spread_pct" ? "Spread % (signed)" : "Net spread % (with funding)")} />
                 <Line
                   type="monotone"
-                  dataKey="spread_pct_abs"
-                  name="spread_pct_abs"
+                  dataKey="spread_pct"
+                  name="spread_pct"
                   stroke="#3b82f6"
+                  strokeWidth={2.5}
                   dot={false}
-                  strokeWidth={2}
+                  activeDot={{ r: 4, fill: "#3b82f6", stroke: "#fff", strokeWidth: 1 }}
                 />
                 <Line
                   type="monotone"
                   dataKey="net_spread_pct"
                   name="net_spread_pct"
                   stroke="#10b981"
+                  strokeWidth={2.5}
                   dot={false}
-                  strokeWidth={2}
+                  activeDot={{ r: 4, fill: "#10b981", stroke: "#fff", strokeWidth: 1 }}
                 />
               </LineChart>
             </ResponsiveContainer>

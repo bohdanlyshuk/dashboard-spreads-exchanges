@@ -252,9 +252,9 @@ export default function PricesTable() {
       const ask = row.arbitrage.best_ask.exchange.toLowerCase();
       if (!exchanges.has(bid) || !exchanges.has(ask)) return false;
       const from = parseFloat(spreadFrom);
-      if (!Number.isNaN(from) && row.arbitrage.spread_pct_abs < from) return false;
+      if (!Number.isNaN(from) && row.arbitrage.spread_pct < from) return false;
       const to = parseFloat(spreadTo);
-      if (!Number.isNaN(to) && row.arbitrage.spread_pct_abs > to) return false;
+      if (!Number.isNaN(to) && row.arbitrage.spread_pct > to) return false;
       const nFrom = parseFloat(netSpreadFrom);
       if (!Number.isNaN(nFrom) && row.arbitrage.net_spread_pct < nFrom) return false;
       const nTo = parseFloat(netSpreadTo);
@@ -459,7 +459,15 @@ export default function PricesTable() {
                   )}
                 >
                   <td className="px-6 py-4 font-bold text-emerald-400 text-left">{row.symbol}</td>
-                  <td className="px-6 py-4 text-center tabular-nums font-medium text-gray-200">{row.arbitrage.spread_pct_abs.toFixed(4)}</td>
+                  <td className="px-6 py-4 text-center tabular-nums font-medium">
+                    <span className={cn(
+                      row.arbitrage.spread_pct > 0 && "text-emerald-400",
+                      row.arbitrage.spread_pct < 0 && "text-red-400",
+                      row.arbitrage.spread_pct === 0 && "text-gray-400"
+                    )}>
+                      {row.arbitrage.spread_pct.toFixed(4)}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-center tabular-nums font-medium text-gray-200">{row.arbitrage.net_spread_pct.toFixed(4)}</td>
                   <td className="px-6 py-4">
                     <ExchangeCell
