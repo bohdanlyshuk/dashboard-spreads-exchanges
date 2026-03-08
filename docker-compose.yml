@@ -3,7 +3,7 @@ services:
     build:
       context: .
       args:
-        VITE_API_URL: ${VITE_API_URL:-http://localhost:8101}
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:8001}
     ports:
       - "9080:80"
     # Optional: pass at runtime via env file or -e VITE_API_URL=https://api.example.com
