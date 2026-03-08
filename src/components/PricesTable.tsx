@@ -246,19 +246,24 @@ export default function PricesTable() {
 
   const list = (data ?? []) as PricesResponse[];
 
+  const getSpreadPct = (row: PricesResponse) =>
+    Number((row.arbitrage as { spread_pct?: number; spread_pct_abs?: number }).spread_pct ?? (row.arbitrage as { spread_pct_abs?: number }).spread_pct_abs ?? 0);
+
   const filteredList = useMemo(() => {
     return list.filter((row) => {
-      const bid = row.arbitrage.best_bid.exchange.toLowerCase();
-      const ask = row.arbitrage.best_ask.exchange.toLowerCase();
-      if (!exchanges.has(bid) || !exchanges.has(ask)) return false;
+      const bid = row.arbitrage.best_bid?.exchange?.toLowerCase();
+      const ask = row.arbitrage.best_ask?.exchange?.toLowerCase();
+      if (!bid || !ask || !exchanges.has(bid) || !exchanges.has(ask)) return false;
+      const spreadPct = getSpreadPct(row);
       const from = parseFloat(spreadFrom);
-      if (!Number.isNaN(from) && row.arbitrage.spread_pct < from) return false;
+      if (!Number.isNaN(from) && spreadPct < from) return false;
       const to = parseFloat(spreadTo);
-      if (!Number.isNaN(to) && row.arbitrage.spread_pct > to) return false;
+      if (!Number.isNaN(to) && spreadPct > to) return false;
+      const netPct = Number(row.arbitrage.net_spread_pct ?? 0);
       const nFrom = parseFloat(netSpreadFrom);
-      if (!Number.isNaN(nFrom) && row.arbitrage.net_spread_pct < nFrom) return false;
+      if (!Number.isNaN(nFrom) && netPct < nFrom) return false;
       const nTo = parseFloat(netSpreadTo);
-      if (!Number.isNaN(nTo) && row.arbitrage.net_spread_pct > nTo) return false;
+      if (!Number.isNaN(nTo) && netPct > nTo) return false;
       const sym = symbolFilter.trim();
       if (sym && !row.symbol.toUpperCase().includes(sym.toUpperCase())) return false;
       return true;
@@ -461,14 +466,14 @@ export default function PricesTable() {
                   <td className="px-6 py-4 font-bold text-emerald-400 text-left">{row.symbol}</td>
                   <td className="px-6 py-4 text-center tabular-nums font-medium">
                     <span className={cn(
-                      row.arbitrage.spread_pct > 0 && "text-emerald-400",
-                      row.arbitrage.spread_pct < 0 && "text-red-400",
-                      row.arbitrage.spread_pct === 0 && "text-gray-400"
+                      getSpreadPct(row) > 0 && "text-emerald-400",
+                      getSpreadPct(row) < 0 && "text-red-400",
+                      getSpreadPct(row) === 0 && "text-gray-400"
                     )}>
-                      {row.arbitrage.spread_pct.toFixed(4)}
+                      {getSpreadPct(row).toFixed(4)}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-center tabular-nums font-medium text-gray-200">{row.arbitrage.net_spread_pct.toFixed(4)}</td>
+                  <td className="px-6 py-4 text-center tabular-nums font-medium text-gray-200">{(Number(row.arbitrage.net_spread_pct ?? 0)).toFixed(4)}</td>
                   <td className="px-6 py-4">
                     <ExchangeCell
                       exchange={row.arbitrage.best_ask.exchange}

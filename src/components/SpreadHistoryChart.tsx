@@ -210,12 +210,12 @@ export default function SpreadHistoryChart({
                 <YAxis
                   stroke="rgba(255,255,255,0.15)"
                   tick={{ fill: "#9ca3af", fontSize: 11 }}
-                  tickFormatter={(v) => `${Number(v).toFixed(3)}%`}
+                  tickFormatter={(v) => `${Number(v ?? 0).toFixed(3)}%`}
                   domain={["auto", "auto"]}
                 />
                 <Tooltip
                   formatter={(v: number, name: string) => [
-                    `${Number(v).toFixed(4)}%`,
+                    `${Number(v ?? 0).toFixed(4)}%`,
                     name === "spread_pct" ? "Spread % (signed)" : "Net spread %",
                   ]}
                   labelFormatter={(v) => new Date(v).toLocaleString()}
