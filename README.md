@@ -13,7 +13,7 @@ Dashboard and API are **separate projects**. Run and deploy them independently; 
 
 ```bash
 cp .env.example .env
-# Optional: VITE_API_URL defaults to http://localhost:8001. API must allow CORS.
+# Optional: VITE_API_URL defaults to http://localhost:8002. API must allow CORS.
 
 npm install
 npm run dev
@@ -23,7 +23,7 @@ Open http://localhost:5173.
 
 ## Docker
 
-Build and run (default API: http://localhost:8001):
+Build and run (default API: http://localhost:8002):
 
 ```bash
 docker build -t spreads-dashboard .
@@ -44,7 +44,7 @@ Site is available on port **9080**. To change the port, edit `"9080:80"` in `doc
 
 | Variable        | Description |
 |-----------------|-------------|
-| `VITE_API_URL`  | API base URL. Default: `http://localhost:8001`. |
+| `VITE_API_URL`  | API base URL. Default: `http://localhost:8002`. |
 
 ## Stack
 
